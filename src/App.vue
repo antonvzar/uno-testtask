@@ -1,9 +1,17 @@
-<script setup>
-import { RouterLink, RouterView } from "vue-router";
-</script>
-
 <template>
-  <RouterView />
+  <div id="app">
+    <FriendsList />
+  </div>
 </template>
+
+<script>
+import FriendsList from "./components/FriendsList.vue";
+
+export default {
+  components: {
+    FriendsList,
+  },
+};
+</script>
 
 <style scoped></style>
