@@ -2,15 +2,13 @@
   <div>
     <h1>Список друзей</h1>
     <ul>
-      <li v-for="friend in friends" :key="friend.id" class="friend">
+      <li v-for="friend in friends" :key="friend.id">
         <img :src="friend.photo_100" alt="Фото друга" />
-        <div>
-          <p>{{ friend.first_name }} {{ friend.last_name }}</p>
-          <p>Возраст: {{ calculateAge(friend.bdate) }}</p>
-        </div>
+        <p>{{ friend.first_name }} {{ friend.last_name }}</p>
       </li>
     </ul>
-    <p v-if="!friends.length">Загрузка...</p>
+    <p v-if="!friends.length && !loading">Друзей не найдено</p>
+    <p v-if="loading">Загрузка...</p>
   </div>
 </template>
 
@@ -20,56 +18,53 @@ import axios from "axios";
 export default {
   data() {
     return {
-      friends: [], // Список друзей
-      accessToken:
-        "059f1c48059f1c48059f1c489606b89aea0059f059f1c486219d39470f3fb1e3279147e", // Замените на ваш токен
-      userId: "52922018", // Замените на ваш ID пользователя
+      friends: [],
+      loading: true,
     };
   },
   mounted() {
-    this.getFriends();
+    this.fetchFriends();
   },
   methods: {
-    async getFriends() {
+    async fetchFriends() {
+      const token = localStorage.getItem("vk_token");
+      if (!token) {
+        this.$router.push("/"); // Если токен отсутствует, перенаправляем на главную
+        return;
+      }
+
       try {
         const response = await axios.get(
           "https://api.vk.com/method/friends.get",
           {
             params: {
-              user_id: this.userId,
-              access_token: this.accessToken,
+              access_token: token,
               v: "5.131",
-              fields: "photo_100,bdate",
+              fields: "photo_100",
             },
           }
         );
-
-        // Сохраняем список друзей
         this.friends = response.data.response.items;
       } catch (error) {
-        console.error("Ошибка при запросе друзей:", error);
+        console.error("Ошибка загрузки списка друзей:", error);
+      } finally {
+        this.loading = false;
       }
-    },
-    calculateAge(birthdate) {
-      if (!birthdate) return "не указан";
-      const [day, month, year] = birthdate.split(".");
-      if (!year) return "не указан";
-      const birthDate = new Date(year, month - 1, day);
-      const ageDiff = Date.now() - birthDate.getTime();
-      const ageDate = new Date(ageDiff);
-      return Math.abs(ageDate.getUTCFullYear() - 1970);
     },
   },
 };
 </script>
 
 <style scoped>
-.friend {
+ul {
+  list-style-type: none;
+}
+li {
   display: flex;
   align-items: center;
   margin-bottom: 10px;
 }
-.friend img {
+img {
   width: 50px;
   height: 50px;
   border-radius: 50%;

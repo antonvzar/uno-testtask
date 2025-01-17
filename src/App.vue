@@ -1,15 +1,16 @@
 <template>
   <div id="app">
-    <FriendsList />
+    <router-view />
+    <AuthView />
   </div>
 </template>
 
 <script>
-import FriendsList from "./components/FriendsList.vue";
+import AuthView from "./views/AuthView.vue";
 
 export default {
   components: {
-    FriendsList,
+    AuthView,
   },
 };
 </script>
